@@ -3,6 +3,7 @@ from pathlib import Path
 
 import polars as pl
 
+from moneypype.schemas import TRANSACTIONS_SCHEMA
 from moneypype.etl import CsvTransactionsPipeline
 
 
@@ -28,3 +29,6 @@ def test_csv_transform(pipeline):
     assert curated_file.exists()
 
     curated = pl.read_parquet(curated_file)
+    assert curated.schema == TRANSACTIONS_SCHEMA
+
+    assert curated.height == 3

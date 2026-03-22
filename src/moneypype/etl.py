@@ -3,7 +3,7 @@ from pathlib import Path
 
 import polars as pl
 
-# df = df.rename({"ref_currency_amount": "amount_fx_ccy"})
+from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
 class CsvTransactionsPipeline:
@@ -23,5 +23,11 @@ class CsvTransactionsPipeline:
         return self
 
     def transform(self):
+        self.df = self.df.rename({"ref_currency_amount": "amount_fx_ccy"})
+
+        self.df = self.df.with_columns(
+            [pl.col(name).cast(dtype) for name, dtype in TRANSACTIONS_SCHEMA.items()]
+        ).select(TRANSACTIONS_SCHEMA.keys())
+
         self._save_parquet("curated")
         return self
