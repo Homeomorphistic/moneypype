@@ -21,3 +21,6 @@ build-backend = "poetry.core.masonry.api"
 dev = [
     "pytest (>=9.0.2,<10.0.0)"
 ]
+
+[project.scripts]
+moneypype = 'moneypype.console:main'
