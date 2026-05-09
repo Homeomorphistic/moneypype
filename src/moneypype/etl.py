@@ -1,33 +1,36 @@
-from importlib.resources import files
-from pathlib import Path
+from importlib import resources
 
 import polars as pl
 
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
-class CsvTransactionsPipeline:
-    def __init__(self, source: str, dest: str | None = None):
-        self.source = source
-        self.dest = dest if dest else files("moneypype.data")
+def extract() -> pl.DataFrame:
+    path = resources.files("moneypype").joinpath("data", "raw", "2026-03-03_budget.csv")
 
-    def _save_parquet(self, subdir: str):
-        dir_path = Path(self.dest) / subdir
-        dir_path.mkdir(parents=True, exist_ok=True)
-        filename = Path(self.source).stem + ".parquet"
-        self.df.write_parquet(dir_path / filename)
+    return pl.read_csv(path, decimal_comma=True, null_values="NA")
 
-    def extract(self):
-        self.df = pl.read_csv(self.source, decimal_comma=True, null_values="NA")
-        self._save_parquet("staging")
-        return self
 
-    def transform(self):
-        self.df = self.df.rename({"ref_currency_amount": "amount_fx_ccy"})
+def transform(data: pl.DataFrame) -> pl.DataFrame:
+    data = (
+        data.with_columns(
+            pl.col("date").cast(pl.Date),
+            (pl.col("amount") * 100).cast(pl.Int32),
+            (pl.col("ref_currency_amount") * 100).cast(pl.Int32),
+        )
+        .rename({"ref_currency_amount": "amount_fx_ccy"})
+        .select(TRANSACTIONS_SCHEMA.keys())
+    )
 
-        self.df = self.df.with_columns(
-            [pl.col(name).cast(dtype) for name, dtype in TRANSACTIONS_SCHEMA.items()]
-        ).select(TRANSACTIONS_SCHEMA.keys())
+    return data
 
-        self._save_parquet("curated")
-        return self
+
+def load(data: pl.DataFrame) -> None:
+    pass
+
+
+def run() -> None:
+    data = extract()
+    data = transform(data)
+    load(data)
+    return data
