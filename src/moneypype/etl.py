@@ -8,9 +8,11 @@ from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
 def extract() -> pl.DataFrame:
-    path = resources.files("moneypype").joinpath("data", "raw", "2026-03-03_budget.csv")
+    path = resources.files("moneypype").joinpath(
+        "data", "raw", "2026-03-03_budget.csv"
+    )
 
-    return pl.read_csv(path, decimal_comma=True, null_values="NA")
+    return pl.read_csv(str(path), decimal_comma=True, null_values="NA")
 
 
 def transform(data: pl.DataFrame) -> pl.DataFrame:
@@ -31,7 +33,7 @@ def load(data: pl.DataFrame, con: duckdb.DuckDBPyConnection) -> None:
     con.sql("CREATE OR REPLACE TABLE transactions AS SELECT * FROM data")
 
 
-def run() -> None:
+def run() -> pl.DataFrame:
     with get_duckdb_connection() as con:
         data = extract()
         data = transform(data)
