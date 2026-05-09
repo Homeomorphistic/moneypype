@@ -1,18 +1,12 @@
 from importlib import resources
 
-import duckdb
 import polars as pl
 
-from moneypype.duck import get_duckdb_connection
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
-def extract() -> pl.DataFrame:
-    path = resources.files("moneypype").joinpath(
-        "data", "raw", "2026-03-03_budget.csv"
-    )
-
-    return pl.read_csv(str(path), decimal_comma=True, null_values="NA")
+def extract(filepath: str) -> pl.DataFrame:
+    return pl.read_csv(filepath, decimal_comma=True, null_values="NA")
 
 
 def transform(data: pl.DataFrame) -> pl.DataFrame:
@@ -29,19 +23,23 @@ def transform(data: pl.DataFrame) -> pl.DataFrame:
     return data
 
 
-def load(data: pl.DataFrame, con: duckdb.DuckDBPyConnection) -> None:
-    con.sql("CREATE OR REPLACE TABLE transactions AS SELECT * FROM data")
+def load(data: pl.DataFrame, dest: str) -> None:
+    data.write_parquet(dest)
 
 
-def run() -> pl.DataFrame:
-    with get_duckdb_connection() as con:
-        data = extract()
-        data = transform(data)
-        load(data, con)
+def run(source: str, dest: str) -> pl.DataFrame:
+    data = extract(source)
+    data = transform(data)
+    load(data, dest)
 
     return data
 
 
 if __name__ == "__main__":
-    data = run()
+    package_path = resources.files("moneypype")
+    source = package_path.joinpath("data", "raw", "2026-03-03_budget.csv")
+    dest = package_path.joinpath(
+        "data", "staging", "2026-03-03_budget.parquet"
+    )
+    data = run(str(source), str(dest))
     print(data)
