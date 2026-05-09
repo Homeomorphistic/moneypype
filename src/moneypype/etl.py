@@ -1,7 +1,9 @@
 from importlib import resources
 
+import duckdb
 import polars as pl
 
+from moneypype.duck import get_duckdb_connection
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
@@ -25,12 +27,17 @@ def transform(data: pl.DataFrame) -> pl.DataFrame:
     return data
 
 
-def load(data: pl.DataFrame) -> None:
-    pass
+def load(data: pl.DataFrame, con: duckdb.DuckDBPyConnection) -> None:
+    con.sql("CREATE TABLE transactions AS SELECT * FROM data")
 
 
 def run() -> None:
-    data = extract()
-    data = transform(data)
-    load(data)
+    with get_duckdb_connection() as con:
+        data = extract()
+        data = transform(data)
+        load(data, con)
+
     return data
+
+if __name__ == "__main__":
+    run()
