@@ -28,7 +28,7 @@ def transform(data: pl.DataFrame) -> pl.DataFrame:
 
 
 def load(data: pl.DataFrame, con: duckdb.DuckDBPyConnection) -> None:
-    con.sql("CREATE TABLE transactions AS SELECT * FROM data")
+    con.sql("CREATE OR REPLACE TABLE transactions AS SELECT * FROM data")
 
 
 def run() -> None:
@@ -39,5 +39,7 @@ def run() -> None:
 
     return data
 
+
 if __name__ == "__main__":
-    run()
+    data = run()
+    print(data)
