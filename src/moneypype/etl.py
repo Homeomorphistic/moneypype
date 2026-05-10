@@ -3,7 +3,11 @@ from typing import Optional
 
 import polars as pl
 
-from moneypype.schemas import TRANSACTIONS_SCHEMA
+from moneypype.schemas import (
+    TRANSACTIONS_SCHEMA,
+    RAW_TRANSACTIONS_SCHEMA,
+    VALID_TRANSACTIONS_SCHEMA,
+)
 
 
 def run(
@@ -12,7 +16,13 @@ def run(
     source = source or _default_source()
     dest = dest or _default_dest()
 
-    return _extract(source).pipe(_transform).pipe(_load, dest)
+    return (
+        _extract(source)
+        .pipe(_validate_input)
+        .pipe(_transform)
+        .pipe(_validate_output)
+        .pipe(_load, dest)
+    )
 
 
 def _default_source() -> str:
@@ -35,6 +45,11 @@ def _extract(filepath: str) -> pl.DataFrame:
     return pl.read_csv(filepath, decimal_comma=True, null_values="NA")
 
 
+def _validate_input(data: pl.DataFrame) -> pl.DataFrame:
+    RAW_TRANSACTIONS_SCHEMA.validate(data)
+    return data
+
+
 def _transform(data: pl.DataFrame) -> pl.DataFrame:
     data = (
         data.with_columns(
@@ -46,6 +61,11 @@ def _transform(data: pl.DataFrame) -> pl.DataFrame:
         .select(TRANSACTIONS_SCHEMA.keys())
     )
 
+    return data
+
+
+def _validate_output(data: pl.DataFrame) -> pl.DataFrame:
+    VALID_TRANSACTIONS_SCHEMA.validate(data)
     return data
 
 

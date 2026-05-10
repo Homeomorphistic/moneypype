@@ -1,12 +1,16 @@
+import pytest
+
 import polars as pl
 from polars.testing import assert_schema_equal
+from pandera.errors import SchemaError
 
-from moneypype.etl import run
+from moneypype.etl import run, _validate_input
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
-def test_run(tmp_path):
-    data = pl.DataFrame(
+@pytest.fixture
+def data():
+    return pl.DataFrame(
         {
             "date": ["2023-01-01"],
             "account": ["Account1"],
@@ -19,6 +23,16 @@ def test_run(tmp_path):
             "label": ["Label1"],
         }
     )
+
+
+def test_input_validation(data):
+    data = data.with_columns(pl.col("amount").cast(pl.String))
+
+    with pytest.raises(SchemaError):
+        _validate_input(data)
+
+
+def test_run(tmp_path, data):
 
     source = tmp_path / "test.csv"
     dest = tmp_path / "test.parquet"
