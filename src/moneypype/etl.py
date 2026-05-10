@@ -5,11 +5,19 @@ import polars as pl
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
-def extract(filepath: str) -> pl.DataFrame:
+def run(source: str, dest: str) -> pl.DataFrame:
+    data = _extract(source)
+    data = _transform(data)
+    _load(data, dest)
+
+    return data
+
+
+def _extract(filepath: str) -> pl.DataFrame:
     return pl.read_csv(filepath, decimal_comma=True, null_values="NA")
 
 
-def transform(data: pl.DataFrame) -> pl.DataFrame:
+def _transform(data: pl.DataFrame) -> pl.DataFrame:
     data = (
         data.with_columns(
             pl.col("date").cast(pl.Date),
@@ -23,16 +31,8 @@ def transform(data: pl.DataFrame) -> pl.DataFrame:
     return data
 
 
-def load(data: pl.DataFrame, dest: str) -> None:
+def _load(data: pl.DataFrame, dest: str) -> None:
     data.write_parquet(dest)
-
-
-def run(source: str, dest: str) -> pl.DataFrame:
-    data = extract(source)
-    data = transform(data)
-    load(data, dest)
-
-    return data
 
 
 if __name__ == "__main__":
