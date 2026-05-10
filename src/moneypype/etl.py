@@ -12,22 +12,22 @@ def run(
     source = source or _default_source()
     dest = dest or _default_dest()
 
-    data = _extract(source)
-    data = _transform(data)
-    _load(data, dest)
-
-    return data
+    return _extract(source).pipe(_transform).pipe(_load, dest)
 
 
 def _default_source() -> str:
-    package_path = resources.files("moneypype")
-    return str(package_path.joinpath("data", "raw", "2026-03-03_budget.csv"))
+    return str(
+        resources.files("moneypype").joinpath(
+            "data", "raw", "2026-03-03_budget.csv"
+        )
+    )
 
 
 def _default_dest() -> str:
-    package_path = resources.files("moneypype")
     return str(
-        package_path.joinpath("data", "staging", "2026-03-03_budget.parquet")
+        resources.files("moneypype").joinpath(
+            "data", "staging", "2026-03-03_budget.parquet"
+        )
     )
 
 
@@ -49,8 +49,9 @@ def _transform(data: pl.DataFrame) -> pl.DataFrame:
     return data
 
 
-def _load(data: pl.DataFrame, dest: str) -> None:
+def _load(data: pl.DataFrame, dest: str) -> pl.DataFrame:
     data.write_parquet(dest)
+    return data
 
 
 if __name__ == "__main__":
