@@ -1,6 +1,3 @@
-from importlib import resources
-from typing import Optional
-
 import polars as pl
 
 from moneypype.schemas import (
@@ -10,34 +7,13 @@ from moneypype.schemas import (
 )
 
 
-def run(
-    source: Optional[str] = None, dest: Optional[str] = None
-) -> pl.DataFrame:
-    source = source or _default_source()
-    dest = dest or _default_dest()
-
+def run(input_path: str, output_path: str) -> pl.DataFrame:
     return (
-        _extract(source)
+        _extract(input_path)
         .pipe(_validate_input)
         .pipe(_transform)
         .pipe(_validate_output)
-        .pipe(_load, dest)
-    )
-
-
-def _default_source() -> str:
-    return str(
-        resources.files("moneypype").joinpath(
-            "data", "raw", "2026-03-03_budget.csv"
-        )
-    )
-
-
-def _default_dest() -> str:
-    return str(
-        resources.files("moneypype").joinpath(
-            "data", "staging", "2026-03-03_budget.parquet"
-        )
+        .pipe(_load, output_path)
     )
 
 
@@ -69,11 +45,6 @@ def _validate_output(data: pl.DataFrame) -> pl.DataFrame:
     return data
 
 
-def _load(data: pl.DataFrame, dest: str) -> pl.DataFrame:
-    data.write_parquet(dest)
+def _load(data: pl.DataFrame, output_path: str) -> pl.DataFrame:
+    data.write_parquet(output_path)
     return data
-
-
-if __name__ == "__main__":
-    data = run()
-    print(data)

@@ -1,4 +1,5 @@
 import argparse
+from importlib import resources
 from pathlib import Path
 
 import polars as pl
@@ -8,16 +9,10 @@ import moneypype.etl as etl
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="moneypype CLI")
-    parser.add_argument(
-        "source",
-        help="input file name",
-        default=etl._default_source(),
-        nargs="?",
-    )
+    parser.add_argument("source")
     parser.add_argument(
         "dest",
-        help="output file name",
-        default=None,
+        default=default_dest(),
         nargs="?",
     )
 
@@ -27,14 +22,18 @@ def main() -> None:
     print(data)
 
 
-def run(source: str, dest: str) -> pl.DataFrame:
-    if not Path(source).is_file():
-        raise FileNotFoundError(f"Source file not found: {source}")
+def default_dest() -> str:
+    return str(resources.files("moneypype").joinpath("data", "staging"))
 
-    filename = Path(source).name.replace(".csv", ".parquet")
-    dest_ = Path(dest).joinpath(filename)
 
-    if dest_.is_file():
-        raise FileExistsError(f"Destination file already exists: {dest_}")
+def run(input_path: str, dest_dir: str) -> pl.DataFrame:
+    if not Path(input_path).is_file():
+        raise FileNotFoundError(f"Source file not found: {input_path}")
 
-    return etl.run(source, str(dest_))
+    filename = Path(input_path).name.replace(".csv", ".parquet")
+    dest = Path(dest_dir).joinpath(filename)
+
+    if dest.is_file():
+        raise FileExistsError(f"Destination file already exists: {dest}")
+
+    return etl.run(input_path, str(dest))
