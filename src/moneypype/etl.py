@@ -1,4 +1,5 @@
 from importlib import resources
+from pathlib import Path
 from typing import Optional
 
 import polars as pl
@@ -15,6 +16,9 @@ def run(
 ) -> pl.DataFrame:
     source = source or _default_source()
     dest = dest or _default_dest()
+
+    if not Path(source).is_file():
+        raise FileNotFoundError(f"Source file not found: {source}")
 
     return (
         _extract(source)

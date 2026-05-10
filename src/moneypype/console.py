@@ -1,12 +1,15 @@
-from importlib import resources
-from moneypype.etl import run
+import argparse
+
+from moneypype.etl import run, _default_source
 
 
 def main() -> None:
-    package_path = resources.files("moneypype")
-    source = package_path.joinpath("data", "raw", "2026-03-03_budget.csv")
-    dest = package_path.joinpath(
-        "data", "staging", "2026-03-03_budget.parquet"
+    parser = argparse.ArgumentParser(description="moneypype CLI")
+    parser.add_argument(
+        "source", help="input file name", default=_default_source(), nargs="?"
     )
-    data = run(str(source), str(dest))
+
+    args = parser.parse_args()
+
+    data = run(args.source)
     print(data)
