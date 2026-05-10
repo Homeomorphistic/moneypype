@@ -1,16 +1,34 @@
 from importlib import resources
+from typing import Optional
 
 import polars as pl
 
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
-def run(source: str, dest: str) -> pl.DataFrame:
+def run(
+    source: Optional[str] = None, dest: Optional[str] = None
+) -> pl.DataFrame:
+    source = source or _default_source()
+    dest = dest or _default_dest()
+
     data = _extract(source)
     data = _transform(data)
     _load(data, dest)
 
     return data
+
+
+def _default_source() -> str:
+    package_path = resources.files("moneypype")
+    return str(package_path.joinpath("data", "raw", "2026-03-03_budget.csv"))
+
+
+def _default_dest() -> str:
+    package_path = resources.files("moneypype")
+    return str(
+        package_path.joinpath("data", "staging", "2026-03-03_budget.parquet")
+    )
 
 
 def _extract(filepath: str) -> pl.DataFrame:
@@ -36,10 +54,5 @@ def _load(data: pl.DataFrame, dest: str) -> None:
 
 
 if __name__ == "__main__":
-    package_path = resources.files("moneypype")
-    source = package_path.joinpath("data", "raw", "2026-03-03_budget.csv")
-    dest = package_path.joinpath(
-        "data", "staging", "2026-03-03_budget.parquet"
-    )
-    data = run(str(source), str(dest))
+    data = run()
     print(data)
