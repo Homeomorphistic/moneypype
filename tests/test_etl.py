@@ -26,7 +26,9 @@ def data():
 
 
 def test_input_validation(data):
-    data = data.with_columns(pl.col("amount").cast(pl.String))
+    data = data.with_columns(
+        pl.col("amount").cast(pl.String), pl.lit(None).alias("label")
+    )
 
     with pytest.raises(SchemaError):
         _validate_input(data)
