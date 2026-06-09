@@ -1,6 +1,6 @@
 import polars as pl
 
-from moneypype.etl import _validate_output, _load
+from moneypype.etl import validate_output, load
 from moneypype.schemas import (
     TRANSACTIONS_SCHEMA,
     RAW_TRANSACTIONS_SCHEMA,
@@ -12,8 +12,8 @@ def run(input_path: str, output_path: str) -> pl.DataFrame:
         _extract(input_path)
         .pipe(_validate_input)
         .pipe(_transform)
-        .pipe(_validate_output)
-        .pipe(_load, output_path)
+        .pipe(validate_output)
+        .pipe(load, output_path)
     )
 
 

@@ -45,3 +45,18 @@ def test_run(tmp_path, data):
     result = pl.read_parquet(dest)
 
     assert_schema_equal(result.schema, TRANSACTIONS_SCHEMA)
+
+
+def test_run_null_fx_amount(tmp_path, data):
+    row_with_null = data.with_columns(pl.lit(None).cast(pl.Float64).alias("ref_currency_amount"))
+    data = pl.concat([data, row_with_null])
+
+    source = tmp_path / "test.csv"
+    dest = tmp_path / "test.parquet"
+
+    data.write_csv(source, decimal_comma=True, null_value="NA")
+    run(source, dest)
+
+    result = pl.read_parquet(dest)
+
+    assert result["amount_fx_ccy"][1] is None
