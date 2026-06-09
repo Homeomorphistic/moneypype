@@ -4,7 +4,7 @@ from pathlib import Path
 
 import polars as pl
 
-import moneypype.etl as etl
+import moneypype.etl_csv as etl
 
 
 def main() -> None:

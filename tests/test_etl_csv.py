@@ -4,7 +4,7 @@ import polars as pl
 from polars.testing import assert_schema_equal
 from pandera.errors import SchemaError
 
-from moneypype.etl import run, _validate_input
+from moneypype.etl_csv import run, _validate_input
 from moneypype.schemas import TRANSACTIONS_SCHEMA
 
 
