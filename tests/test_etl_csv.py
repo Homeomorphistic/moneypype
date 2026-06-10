@@ -48,7 +48,9 @@ def test_run(tmp_path, data):
 
 
 def test_run_null_fx_amount(tmp_path, data):
-    row_with_null = data.with_columns(pl.lit(None).cast(pl.Float64).alias("ref_currency_amount"))
+    row_with_null = data.with_columns(
+        pl.lit(None).cast(pl.Float64).alias("ref_currency_amount")
+    )
     data = pl.concat([data, row_with_null])
 
     source = tmp_path / "test.csv"

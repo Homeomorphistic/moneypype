@@ -29,6 +29,20 @@ RAW_TRANSACTIONS_SCHEMA = pa.DataFrameSchema(
     }
 )
 
+RAW_EXCEL_TRANSACTIONS_SCHEMA = pa.DataFrameSchema(
+    {
+        "date": pa.Column(pl.Date),
+        "account": pa.Column(pl.String),
+        "category": pa.Column(pl.String),
+        "type": pa.Column(pl.String),
+        "note": pa.Column(pl.String, nullable=True),
+        "currency": pa.Column(pl.String),
+        "amount": pa.Column(pl.Float64),
+        "ref_currency_amount": pa.Column(pl.Float64, nullable=True),
+        "label": pa.Column(pl.String, nullable=True),
+    }
+)
+
 VALID_TRANSACTIONS_SCHEMA = pa.DataFrameSchema(
     {
         "date": pa.Column(pl.Date),
