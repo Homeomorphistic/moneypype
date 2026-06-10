@@ -1,10 +1,7 @@
 import polars as pl
 
-from moneypype.etl import validate_output, load
-from moneypype.schemas import (
-    TRANSACTIONS_SCHEMA,
-    RAW_TRANSACTIONS_SCHEMA,
-)
+from moneypype.etl import validate_output, load, scale_and_finalise
+from moneypype.schemas import RAW_TRANSACTIONS_SCHEMA
 
 
 def run(input_path: str, output_path: str) -> pl.DataFrame:
@@ -27,14 +24,6 @@ def _validate_input(data: pl.DataFrame) -> pl.DataFrame:
 
 
 def _transform(data: pl.DataFrame) -> pl.DataFrame:
-    data = (
-        data.with_columns(
-            pl.col("date").cast(pl.Date),
-            (pl.col("amount") * 100).cast(pl.Int32),
-            (pl.col("ref_currency_amount") * 100).cast(pl.Int32),
-        )
-        .rename({"ref_currency_amount": "amount_fx_ccy"})
-        .select(TRANSACTIONS_SCHEMA.keys())
+    return scale_and_finalise(
+        data.with_columns(pl.col("date").cast(pl.Date))
     )
-
-    return data
