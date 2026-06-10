@@ -17,7 +17,7 @@ def main() -> None:
         nargs="?",
     )
     parser.add_argument(
-        "--categories-map", default=None, dest="categories_map"
+        "--categories-map", default=default_map(), dest="categories_map"
     )
 
     args = parser.parse_args()
@@ -28,6 +28,14 @@ def main() -> None:
 
 def default_dest() -> str:
     return str(resources.files("moneypype").joinpath("data", "staging"))
+
+
+def default_map() -> str:
+    return str(
+        resources.files("moneypype").joinpath(
+            "data", "raw", "categories_map.csv"
+        )
+    )
 
 
 def run(
