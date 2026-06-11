@@ -1,6 +1,12 @@
 from datetime import date
+from pathlib import Path
 
 import pytest
+
+
+@pytest.fixture
+def csv_file():
+    return Path(__file__).parent / "fixtures" / "sample.csv"
 
 
 @pytest.fixture
