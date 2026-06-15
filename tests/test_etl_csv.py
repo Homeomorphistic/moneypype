@@ -115,7 +115,7 @@ def test_run_values(csv_file, tmp_path):
     assert result["amount"][1] == -5396
     assert result["amount"][3] == -100000
     assert result["amount_fx_ccy"][3] == 23456
-    assert result["label"][3] == "VYM"
+    assert result["label"][3] == "XYZ"
     assert result["label"][0] is None
     assert result["note"][2] is None
 
