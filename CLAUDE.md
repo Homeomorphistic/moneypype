@@ -51,3 +51,9 @@ Moneypype is a personal finance ETL pipeline: CSV → validate → transform →
 Tests live in `tests/` with two files:
 - `test_console.py` — error handling for missing source / existing destination
 - `test_etl_csv.py` — schema validation errors, full pipeline assertion
+
+## Git Workflow
+
+- Main working branch: `dev`
+- Feature branches are created from `dev` and merged back into `dev`
+- Do not push to `main` directly
