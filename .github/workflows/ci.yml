@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure Poetry virtualenv location
+        run: pip install poetry && poetry config virtualenvs.in-project true
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Lint with flake8
+        run: poetry run flake8 src/ tests/
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure Poetry virtualenv location
+        run: pip install poetry && poetry config virtualenvs.in-project true
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Test with pytest
+        run: poetry run pytest tests --color=yes -vv --tb=short --cov=src/moneypype --cov-report=term-missing
