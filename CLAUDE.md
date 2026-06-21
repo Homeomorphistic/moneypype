@@ -8,6 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 poetry install
 
+# Add a new package
+poetry add <pkg>          # runtime dependency
+poetry add --group dev <pkg>  # dev-only dependency
+
+# Activate the virtual environment before running Python directly
+source .venv/bin/activate
+
 # Run CLI
 moneypype <source.csv> [dest_dir]       # Default dest: src/moneypype/data/staging/
 
@@ -55,7 +62,9 @@ Tests live in `tests/` with two files:
 ## Git Workflow
 
 - Main working branch: `dev`
-- Feature branches are created from `dev` and merged back into `dev`
+- Always branch off `dev`: `git checkout -b <feature-branch> dev`
+- All PRs must target `dev`, never `main`
+- `main` is only updated from `dev` via an explicit release merge
 - Do not push to `main` directly
 
 ## Agent skills
