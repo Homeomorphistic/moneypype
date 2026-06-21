@@ -1,0 +1,6 @@
+"date","account","category","type","note","currency","amount","ref_currency_amount","label"
+2023-01-15,"Alpha","Salary","Income","Test A","USD","36,96","36,96",NA
+2023-01-20,"Beta","Groceries","Needs","Test B","USD","-53,96","-53,96",NA
+2023-01-25,"Beta","Hobby","Wants",NA,"USD","-198","-198",NA
+2023-01-31,"Beta","FX Purchase","Wants","Test C","USD","-1000","234,56","XYZ"
+2023-02-05,"Alpha","Dividends","Income","Test D","USD","50",NA,NA
