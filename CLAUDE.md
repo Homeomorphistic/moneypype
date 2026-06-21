@@ -51,3 +51,17 @@ Moneypype is a personal finance ETL pipeline: CSV → validate → transform →
 Tests live in `tests/` with two files:
 - `test_console.py` — error handling for missing source / existing destination
 - `test_etl_csv.py` — schema validation errors, full pipeline assertion
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as local markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-state vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
