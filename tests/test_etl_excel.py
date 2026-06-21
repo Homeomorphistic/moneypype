@@ -45,7 +45,10 @@ def test_run_income_amount_is_positive(
 def test_run_amounts_in_cents(tmp_path, xlsx_file, categories_map_file):
     dest = str(tmp_path / "out.parquet")
     result = run(xlsx_file, dest, categories_map_file)
-    income = result.filter(pl.col("category") == "Salary")
+    income = result.filter(
+        (pl.col("category") == "Salary") & (pl.col("amount") == 100000)
+    )
+    assert len(income) == 1
     assert income["amount"][0] == 100000
 
 
@@ -82,3 +85,102 @@ def test_input_validation_raises():
     })
     with pytest.raises(SchemaError):
         _validate_input(bad_data)
+
+
+def test_inne_income_category_renamed_to_other(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    inne_row = result.filter(
+        (pl.col("type") == "Income") & (pl.col("category") == "Other")
+    )
+    assert len(inne_row) == 1
+    assert inne_row["category"][0] == "Other"
+
+
+def test_inne_expense_category_renamed_to_other(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    inne_row = result.filter(
+        (pl.col("type") == "Wants") & (pl.col("category") == "Other")
+    )
+    assert len(inne_row) == 1
+    assert inne_row["category"][0] == "Other"
+
+
+def test_run_non_null_label_is_preserved(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    row = result.filter(pl.col("label") == "bonus")
+    assert len(row) == 1
+    assert row["label"][0] == "bonus"
+
+
+def test_run_null_note_in_expense_is_valid(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    expense = result.filter(pl.col("category") == "Groceries")
+    assert expense["note"][0] is None
+
+
+def test_run_expense_amount_fx_ccy_is_negative(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    expense = result.filter(pl.col("category") == "Groceries")
+    assert expense["amount_fx_ccy"][0] is not None
+    assert expense["amount_fx_ccy"][0] < 0
+
+
+def test_run_income_amount_fx_ccy_is_positive_and_scaled(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    income = result.filter(
+        (pl.col("category") == "Salary") & (pl.col("amount") == 100000)
+    )
+    assert income["amount_fx_ccy"][0] is not None
+    assert income["amount_fx_ccy"][0] == 100000
+
+
+def test_run_transfer_from_leg_account_is_source(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    from_leg = result.filter(
+        (pl.col("type") == "Transfer") & (pl.col("amount") < 0)
+    )
+    assert from_leg["account"][0] == "Main Account"
+
+
+def test_run_transfer_to_leg_account_is_destination(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    to_leg = result.filter(
+        (pl.col("type") == "Transfer") & (pl.col("amount") > 0)
+    )
+    assert to_leg["account"][0] == "Savings"
+
+
+def test_run_transfer_from_leg_amount_fx_ccy_is_negative(
+    tmp_path, xlsx_file, categories_map_file
+):
+    dest = str(tmp_path / "out.parquet")
+    result = run(xlsx_file, dest, categories_map_file)
+    from_leg = result.filter(
+        (pl.col("type") == "Transfer") & (pl.col("amount") < 0)
+    )
+    assert from_leg["amount_fx_ccy"][0] is not None
+    assert from_leg["amount_fx_ccy"][0] == -20000
